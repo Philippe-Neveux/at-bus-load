@@ -19,9 +19,9 @@ jobs:
 
     - name: Lint with Ruff
       run: |
-        uv ruff check .
+        uv run ruff check .
 
     - name: Type check with Mypy
       run: |
-        uv mypy .
+        uv run mypy .
 
