@@ -1,0 +1,27 @@
+name: Python Lint and Type Check
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  lint_and_typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install dependencies
+      run: |
+        uv sync
+
+    - name: Lint with Ruff
+      run: |
+        uv ruff check .
+
+    - name: Type check with Mypy
+      run: |
+        uv mypy .
+
