@@ -23,5 +23,5 @@ jobs:
 
     - name: Type check with Mypy
       run: |
-        uv run mypy .
+        uv run mypy . --install-types
 
