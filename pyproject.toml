@@ -21,6 +21,7 @@ dependencies = [
 
 [project.scripts]
 python_entrypoint = "at_bus_load.second_entrypoint:main"
+check_gcs = "at_bus_load.check_gcs:main"
 
 [tool.uv]
 package = true
