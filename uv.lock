@@ -92,7 +92,7 @@ wheels = [
 [[package]]
 name = "at-bus-load"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "google-cloud-storage" },
     { name = "loguru" },

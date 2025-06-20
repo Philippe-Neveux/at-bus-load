@@ -189,6 +189,9 @@ def get_args_params() -> argparse.Namespace:
     
     return args
 
+def print_hello():
+    logger.info("Hello, world!")
+
 def main():
     
     args = get_args_params()
@@ -210,7 +213,6 @@ def main():
         df_trips = get_trips_data(stop_id, api_date)
         send_trips_data_to_gcs(df_trips, stop_id, api_date)
     
-
 
 if __name__ == "__main__":
     main()
