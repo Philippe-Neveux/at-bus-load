@@ -35,3 +35,7 @@ jobs:
       - name: Push Docker image to Artifact Registry
         run: |
           make push_docker_image_to_gcp
+      
+      - name: Create .env file
+        run: |
+          echo "AT_API_KEY=${{ secrets.AT_API_KEY }}" > .env

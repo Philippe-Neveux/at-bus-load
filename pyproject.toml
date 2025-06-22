@@ -21,7 +21,7 @@ dependencies = [
 
 [project.scripts]
 check_gcs = "at_bus_load.check_gcs:main"
-get_at_api_data = "at_bus_load.get_api_data:main"
+get_at_api_data = "at_bus_load.get_at_api_data:main"
 move_gcs_data_to_bq = "at_bus_load.move_gcs_data_to_bq:main"
 
 
