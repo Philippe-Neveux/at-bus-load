@@ -24,6 +24,10 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
 
+      - name: Create .env file
+        run: |
+          echo "AT_API_KEY=${{ secrets.AT_API_KEY }}" > .env
+
       - name: Build Docker image
         run: |
           make build_docker_image
@@ -36,6 +40,4 @@ jobs:
         run: |
           make push_docker_image_to_gcp
       
-      - name: Create .env file
-        run: |
-          echo "AT_API_KEY=${{ secrets.AT_API_KEY }}" > .env
+      
