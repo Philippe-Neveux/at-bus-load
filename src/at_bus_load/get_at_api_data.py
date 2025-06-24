@@ -54,7 +54,9 @@ def get_at_gtfs_data_from_at_mobile_api(
     for col, dtype in df.schema.items():
         if isinstance(dtype, pl.datatypes.Struct):
             df = df.unnest(col)
-            
+    
+    logger.info(f"Successfully unnested data and loaded into Polars DataFrame.")
+                
     return df
     
 def get_at_api_key() -> str:
