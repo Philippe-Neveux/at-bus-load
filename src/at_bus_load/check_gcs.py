@@ -1,9 +1,13 @@
-from google.cloud import storage
 from loguru import logger
 
+from at_bus_load.gcp import ConnectGCS, get_gcp_token_from_default_credentials
+
+
+
 def main():
-        # Create a client instance
-    client = storage.Client()
+
+    token = get_gcp_token_from_default_credentials()
+    client = ConnectGCS(token).client
 
     # Specify the bucket and file name
     bucket_name = 'pne-open-data'

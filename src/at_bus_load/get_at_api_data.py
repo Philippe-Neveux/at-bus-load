@@ -9,6 +9,8 @@ from google.cloud import storage
 from loguru import logger
 import polars as pl
 
+from at_bus_load.gcp import ConnectGCS
+
 
 def get_at_gtfs_data_from_at_mobile_api(
     data_name: str,
@@ -108,12 +110,15 @@ def filter_stops_data(stops_data: pl.DataFrame) -> pl.DataFrame:
         logger.error(f"Error filtering stop data: {e}")
         raise
 
-def send_stop_data_to_gcs(df_stops: pl.DataFrame, api_date: str) -> None:
+def send_stop_data_to_gcs(
+    client: storage.Client,
+    df_stops: pl.DataFrame,
+    api_date: str
+) -> None:
     """
     Sends the stops data to Google Cloud Storage.
     """
     try:
-        client = storage.Client()  # Assumes GOOGLE_APPLICATION_CREDENTIALS is set
         bucket = client.bucket("pne-open-data")
         blob = bucket.blob(f"at-bus/{api_date}/stops.parquet")
         
@@ -152,12 +157,16 @@ def get_trips_data(stop_id: str, api_date: str) -> pl.DataFrame:
         logger.error(f"Error loading trips data for stop {stop_id} on date {api_date}: {e}")
         raise
 
-def send_trips_data_to_gcs(df_trips: pl.DataFrame, stop_id: str, api_date: str) -> None:
+def send_trips_data_to_gcs(
+    client: storage.Client,
+    df_trips: pl.DataFrame,
+    stop_id: str,
+    api_date: str
+) -> None:
     """
     Sends the trips data to Google Cloud Storage.
     """
     try:
-        client = storage.Client()  # Assumes GOOGLE_APPLICATION_CREDENTIALS is set
         bucket = client.bucket("pne-open-data")
         blob = bucket.blob(f"at-bus/{api_date}/trips_{stop_id}.parquet")
         
@@ -183,9 +192,16 @@ def get_args_params() -> argparse.Namespace:
         help="Date for which to fetch the data (format: YYYY-MM-DD). Default is today."
     )
     
+    parser.add_argument(
+        "--token",
+        type=str,
+        default=None,
+        help="GCS token if required"
+    )
+    
     args = parser.parse_args()
     
-    logger.info(f"Arguments received: {args}")
+    logger.info(f"Arguments received: {args}")                  
     
     return args
 
@@ -201,17 +217,19 @@ def main():
     
     load_dotenv()
     
+    client = ConnectGCS(args.token).client
+    
     df_stops: pl.DataFrame = get_stops_data(api_date)
     df_stops: pl.DataFrame = filter_stops_data(df_stops)
     
-    send_stop_data_to_gcs(df_stops, api_date)
+    send_stop_data_to_gcs(client, df_stops, api_date)
     
     stop_ids = df_stops["id"].to_list()
     for stop_id in stop_ids:
         logger.info(f"Fetching trips for stop {stop_id} on date {api_date}")
         
         df_trips = get_trips_data(stop_id, api_date)
-        send_trips_data_to_gcs(df_trips, stop_id, api_date)
+        send_trips_data_to_gcs(client, df_trips, stop_id, api_date)
     
 
 if __name__ == "__main__":
