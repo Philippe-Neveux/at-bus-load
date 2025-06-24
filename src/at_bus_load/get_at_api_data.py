@@ -193,10 +193,10 @@ def get_args_params() -> argparse.Namespace:
     )
     
     parser.add_argument(
-        "--token",
+        "--env-var-token",
         type=str,
-        default=None,
-        help="GCS token if required"
+        default=False,
+        help="The environment variable where to get the token for GCS"
     )
     
     args = parser.parse_args()
@@ -217,7 +217,8 @@ def main():
     
     load_dotenv()
     
-    client = ConnectGCS(args.token).client
+    token = os.getenv(args.env_var_token)
+    client = ConnectGCS(token).client
     
     df_stops: pl.DataFrame = get_stops_data(api_date)
     df_stops: pl.DataFrame = filter_stops_data(df_stops)
