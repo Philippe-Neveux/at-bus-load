@@ -4,10 +4,14 @@ GCP_ARTIFACT_REPOSITORY = python-projects
 DOCKER_IMAGE_NAME = at-bus-load
 
 ruff_check:
-	uv run ruff check .
+	uv run ruff check src/
+	uv run ruff check --select I src/
+
+ruff_isort:
+	uv run ruff check --select I --fix src/
 
 mypy:
-	uv run mypy .
+	uv run mypy src/ 
 
 get_api_data:
 	uv run get_api_data.py

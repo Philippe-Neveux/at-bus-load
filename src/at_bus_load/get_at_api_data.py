@@ -1,15 +1,14 @@
-import argparse
-from datetime import date
-import requests
-from typing import Dict
 import os
+from typing import Dict
 
-from dotenv import load_dotenv
-from google.cloud import storage
-from loguru import logger
 import polars as pl
+import requests
+from dotenv import load_dotenv
+from google.cloud import storage # type: ignore
+from loguru import logger
 
-from at_bus_load.gcp import ConnectGCS
+from at_bus_load.entrypoints_params import get_args_params
+from at_bus_load.gcp import ConnectGCS, get_token_from_env_var
 
 
 def get_at_gtfs_data_from_at_mobile_api(
@@ -18,6 +17,17 @@ def get_at_gtfs_data_from_at_mobile_api(
     headers: Dict[str, str] = {}
 ) -> pl.DataFrame:
     
+    """
+    Fetches data from Auckland Transport's GTFS API.
+
+    Args:
+        data_name: The name of the data to fetch.
+        params: Additional query parameters to pass to the request.
+        headers: Additional headers to pass to the request.
+
+    Returns:
+        A Polars DataFrame containing the fetched data.
+    """
     url = f"https://api.at.govt.nz/gtfs/v3/{data_name}"
     
     response = requests.get(
@@ -34,7 +44,7 @@ def get_at_gtfs_data_from_at_mobile_api(
     if "data" not in data:
         logger.error("Expected 'data' key in the JSON response")
     
-    logger.info(f"Successfully loaded data from request '{response.url}' into .")
+    logger.info(f"Successfully getting data from request '{response.url}'.")
     
     json_data = data["data"]
 
@@ -50,7 +60,18 @@ def get_at_gtfs_data_from_at_mobile_api(
 def get_at_api_key() -> str:
     """
     Retrieves the Auckland Transport API key from environment variables.
+
+    Returns:
+        str: The API key for accessing Auckland Transport services.
+
+    Raises:
+        ValueError: If the API key is not found in the environment variables.
+
+    Logs:
+        Logs an error if the API key is not found.
+        Logs an info message if the API key is successfully retrieved.
     """
+
     api_key = os.getenv("AT_API_KEY")
     
     if not api_key:
@@ -63,8 +84,19 @@ def get_at_api_key() -> str:
 
 def get_stops_data(api_date: str) -> pl.DataFrame:
     """
-    Fetches stop data from a API request and returns it as a Polars DataFrame.
+    Fetches the stops data for a given date from the Auckland Transport GTFS API.
+
+    Args:
+        api_date (str): The date for which to fetch the stops data in 'YYYY-MM-DD' format.
+
+    Returns:
+        pl.DataFrame: A Polars DataFrame containing the stops data with an additional column 'api_date_ingestion'
+                      indicating the date of data ingestion.
+
+    Raises:
+        Exception: If there is an error while fetching or processing the data, the exception is logged and re-raised.
     """
+
     try:
         df_stops = get_at_gtfs_data_from_at_mobile_api(
             data_name="stops",
@@ -86,7 +118,20 @@ def get_stops_data(api_date: str) -> pl.DataFrame:
 
 def filter_stops_data(stops_data: pl.DataFrame) -> pl.DataFrame:
     """
-    Filters the stops data to include only relevant stops id
+    Filters stops data to only include stops with codes in a predefined list.
+
+    Args:
+        stops_data (pl.DataFrame): The stops data to filter.
+
+    Returns:
+        pl.DataFrame: A filtered DataFrame containing only stops with codes in the predefined list.
+
+    Raises:
+        Exception: If there is an error while filtering the data, the exception is logged and re-raised.
+
+    Logs:
+        Logs an info message if the filtering is successful.
+        Logs an error if there is an error while filtering the data.
     """
     try:
         stop_codes = [
@@ -117,6 +162,25 @@ def send_stop_data_to_gcs(
 ) -> None:
     """
     Sends the stops data to Google Cloud Storage.
+
+    This function takes a Polars DataFrame containing stop data, and uploads it as a Parquet file to Google Cloud Storage.
+    The Parquet file is stored in the "at-bus" bucket with the following structure:
+    "at-bus/{api_date}/stops.parquet"
+
+    Args:
+        client: An instance of the Google Cloud Storage client.
+        df_stops: A Polars DataFrame containing stop data.
+        api_date: The date of the data in the source Parquet file.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If there is an error while uploading the data to GCS, the exception is logged and re-raised.
+
+    Logs:
+        Logs an info message if the upload is successful.
+        Logs an error if there is an error while uploading the data to GCS.
     """
     try:
         bucket = client.bucket("pne-open-data")
@@ -133,7 +197,21 @@ def send_stop_data_to_gcs(
 
 def get_trips_data(stop_id: str, api_date: str) -> pl.DataFrame:
     """
-    Fetches trip data for a specific stop on a given date.
+    Fetches the trips data for a given stop and date from the AT API, and returns it as a Polars DataFrame.
+
+    Args:
+        stop_id (str): The ID of the stop for which to fetch trips data.
+        api_date (str): The date for which to fetch trips data.
+
+    Returns:
+        pl.DataFrame: A Polars DataFrame containing the trips data for the specified stop and date.
+
+    Raises:
+        Exception: If there is an error while fetching the data from the AT API, the exception is logged and re-raised.
+
+    Logs:
+        Logs an info message if the data is loaded successfully.
+        Logs an error if there is an error while loading the data from the AT API.
     """
     try:
         df_trips = get_at_gtfs_data_from_at_mobile_api(
@@ -165,6 +243,26 @@ def send_trips_data_to_gcs(
 ) -> None:
     """
     Sends the trips data to Google Cloud Storage.
+
+    This function takes a Polars DataFrame containing trip data, and uploads it as a Parquet file to Google Cloud Storage.
+    The Parquet file is stored in the "at-bus" bucket with the following structure:
+    "at-bus/{api_date}/trips_{stop_id}.parquet"
+
+    Args:
+        client: An instance of the Google Cloud Storage client.
+        df_trips: A Polars DataFrame containing trip data.
+        stop_id: The ID of the stop for which to upload trips data.
+        api_date: The date of the data in the source Parquet file.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If there is an error while uploading the data to GCS, the exception is logged and re-raised.
+
+    Logs:
+        Logs an info message if the upload is successful.
+        Logs an error if there is an error while uploading the data to GCS.
     """
     try:
         bucket = client.bucket("pne-open-data")
@@ -179,37 +277,21 @@ def send_trips_data_to_gcs(
         logger.error(f"Error uploading trip data for stop {stop_id} to GCS: {e}")
         raise
 
-def get_args_params() -> argparse.Namespace:
-    """
-    Parses command line arguments.
-    """
-    parser = argparse.ArgumentParser(description="Fetch and process Auckland Transport bus data.")
-    
-    parser.add_argument(
-        "--date",
-        type=str,
-        default=date.today().strftime("%Y-%m-%d"),
-        help="Date for which to fetch the data (format: YYYY-MM-DD). Default is today."
-    )
-    
-    parser.add_argument(
-        "--env-var-token",
-        type=str,
-        default=False,
-        help="The environment variable where to get the token for GCS"
-    )
-    
-    args = parser.parse_args()
-    
-    logger.info(f"Arguments received: {args}")                  
-    
-    return args
-
-def print_hello():
-    logger.info("Hello, world!")
 
 def main():
     
+    """
+    Main function to fetch and process Auckland Transport bus data.
+
+    This function parses command line arguments, loads environment variables,
+    and establishes a connection to Google Cloud Storage using a token. It
+    retrieves bus stop data for a specified date, filters the data, and uploads
+    it to GCS. For each bus stop, it fetches trip data and uploads it to GCS.
+
+    Raises:
+        Exception: If there are any errors uploading data to GCS.
+    """
+
     args = get_args_params()
     api_date = args.date
     
@@ -217,11 +299,11 @@ def main():
     
     load_dotenv()
     
-    token = os.getenv(args.env_var_token)
+    token = get_token_from_env_var(args.env_var_token)
     client = ConnectGCS(token).client
     
-    df_stops: pl.DataFrame = get_stops_data(api_date)
-    df_stops: pl.DataFrame = filter_stops_data(df_stops)
+    df_stops = get_stops_data(api_date)
+    df_stops = filter_stops_data(df_stops)
     
     send_stop_data_to_gcs(client, df_stops, api_date)
     

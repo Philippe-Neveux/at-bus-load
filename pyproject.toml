@@ -5,7 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
-    "google-cloud-storage>=3.1.0",
+    "google-api-python-client-stubs>=1.29.0",
+    "google-cloud-bigquery>=3.34.0",
+    "google-cloud-storage>=3.1.1",
     "loguru>=0.7.3",
     "mypy>=1.16.1",
     "nb-clean>=4.0.1",
@@ -17,6 +19,7 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "requests>=2.32.4",
     "ruff>=0.11.13",
+    "types-requests>=2.32.4.20250611",
 ]
 
 [project.scripts]
@@ -27,3 +30,6 @@ move_gcs_data_to_bq = "at_bus_load.move_gcs_data_to_bq:main"
 
 [tool.uv]
 package = true
+
+[tool.mypy]
+ignore_missing_imports = true
