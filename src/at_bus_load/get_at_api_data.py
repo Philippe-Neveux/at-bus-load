@@ -4,7 +4,7 @@ from typing import Dict
 import polars as pl
 import requests
 from dotenv import load_dotenv
-from google.cloud import storage # type: ignore
+from google.cloud import storage  # type: ignore
 from loguru import logger
 
 from at_bus_load.entrypoints_params import get_args_params

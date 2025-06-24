@@ -3,7 +3,7 @@ import os
 import google.auth
 import google.auth.transport.requests
 import google.oauth2.credentials
-from google.cloud import bigquery, storage # type: ignore
+from google.cloud import bigquery, storage  # type: ignore
 from loguru import logger
 
 

@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from google.cloud import bigquery, storage # type: ignore
+from google.cloud import bigquery, storage  # type: ignore
 from loguru import logger
 
 from at_bus_load.entrypoints_params import get_args_params
