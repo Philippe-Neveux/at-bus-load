@@ -39,5 +39,11 @@ jobs:
       - name: Push Docker image to Artifact Registry
         run: |
           make push_docker_image_to_gcp
+
+      - name: Deploy image to Airflow VM 
+        run: |
+          gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} \
+          --zone ${{ vars.GCP_REGION_ZONE }} \
+          -- "docker pull australia-southeast1-docker.pkg.dev/glossy-apex-462002-i3/python-projects/at-bus-load:latest"
       
       
