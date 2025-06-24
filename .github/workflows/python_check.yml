@@ -15,11 +15,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        make ruff_check
+        uv sync --locked
 
     - name: Lint with Ruff
       run: |
-        uv run ruff check .
+        make ruff_check
 
     - name: Type check with Mypy
       run: |
