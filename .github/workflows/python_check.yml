@@ -2,7 +2,7 @@ name: Python Lint and Type Check
 
 on:
   push:
-    branches: [ main, build-push-docker-image ]
+    branches: [ main ]
 
 jobs:
   lint_and_typecheck:
