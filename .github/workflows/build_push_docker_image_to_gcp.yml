@@ -64,16 +64,4 @@ jobs:
         run: |
           gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} \
             --zone=${{ vars.GCP_REGION_ZONE }} \
-            --command="docker pull ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/${{ vars.DOCKER_IMAGE_NAME }}:latest"
-
-      - name: Stop and remove old container (if running)
-        run: |
-          gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} \
-            --zone=${{ vars.GCP_REGION_ZONE }} \
-            --command="docker stop ${{ vars.DOCKER_IMAGE_NAME }} || true && docker rm ${{ vars.DOCKER_IMAGE_NAME }} || true"
-
-      - name: Run updated container
-        run: |
-          gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} \
-            --zone=${{ vars.GCP_REGION_ZONE }} \
-            --command="docker run -d --name ${{ vars.DOCKER_IMAGE_NAME }} --restart unless-stopped ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/${{ vars.DOCKER_IMAGE_NAME }}:latest"
+            --command="IMAGE_REF='${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/${{ vars.DOCKER_IMAGE_NAME }}:latest' && docker pull \$IMAGE_REF"
