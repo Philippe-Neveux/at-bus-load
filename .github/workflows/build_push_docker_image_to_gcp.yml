@@ -63,4 +63,7 @@ jobs:
           --command="gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev"
 
       - name: Pull Docker image on VM
-        run: gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} --zone=${{ vars.GCP_REGION_ZONE }} --command="docker pull ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/${{ vars.DOCKER_IMAGE_NAME }}:latest"
+        run: |
+          gcloud compute ssh ${{ vars.GCP_VM_INSTANCE_NAME }} \
+          --zone=${{ vars.GCP_REGION_ZONE }} \
+          --command="docker pull ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REPOSITORY }}/${{ vars.DOCKER_IMAGE_NAME }}:latest"
