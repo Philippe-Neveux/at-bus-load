@@ -1,6 +1,6 @@
+import datetime
 import os
 from typing import Dict, Optional
-import datetime
 
 import polars as pl
 import requests

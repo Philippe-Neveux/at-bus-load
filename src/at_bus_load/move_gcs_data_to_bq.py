@@ -1,6 +1,6 @@
+import datetime
 import re
 from typing import List, Optional
-import datetime
 
 import typer
 from google.cloud import bigquery, storage  # type: ignore
