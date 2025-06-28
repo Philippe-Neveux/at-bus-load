@@ -22,5 +22,10 @@ def main():
     else:
         logger.info(f'The file {file_name} does not exist in bucket {bucket_name}')
         
+def entrypoint():
+    """CLI entry point for the script."""
+    main()
+
+
 if __name__ == "__main__":
     main()

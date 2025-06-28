@@ -1,10 +1,12 @@
 import re
-from typing import List
+from typing import List, Optional
+import datetime
 
+import typer
 from google.cloud import bigquery, storage  # type: ignore
 from loguru import logger
 
-from at_bus_load.entrypoints_params import get_args_params
+from at_bus_load import entrypoints_params
 from at_bus_load.gcp import ConnectBQ, ConnectGCS, get_token_from_env_var
 
 
@@ -151,21 +153,30 @@ def move_trips_data_to_bq(
         move_parquet_file_to_bq_dataset(bq_client, dataset_id, table_id, source_uri)
 
 
-def main():
-    # Set up credentials and client instances
+def main(
+    date: str = typer.Option(
+        default=datetime.date.today().strftime("%Y-%m-%d"),
+        help="Date for which to fetch the data (format: YYYY-MM-DD). Default is today."
+    ),
+    env_var_token: Optional[str] = typer.Option(
+        default=None,
+        help="The environment variable where to get the token for GCS"
+    )
+) -> None:
     """
     Main entry point for the script.
 
     This function sets up credentials and client instances, determines the current
     date, and moves the stops and trips data from GCS to BigQuery.
     """
-    args = get_args_params()
-    exec_date = args.date
+    
+    entrypoints_params.validate_date(date)
+    exec_date = date
     
     logger.info(f"Moving data from GCS to for date: {exec_date}")
     
     
-    token = get_token_from_env_var(args.env_var_token)
+    token = get_token_from_env_var(env_var_token)
     client_gcs = ConnectGCS(token).client
     client_bq = ConnectBQ(token).client
     
@@ -175,5 +186,10 @@ def main():
     move_trips_data_to_bq(client_gcs, client_bq, source_bucket_name, exec_date)
 
 
+def entrypoint():
+    """CLI entry point for the script."""
+    typer.run(main)
+
+
 if __name__ == "__main__":
-    main()
+    typer.run(main)

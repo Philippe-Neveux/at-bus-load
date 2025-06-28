@@ -1,31 +1,21 @@
-import argparse
 from datetime import date
 
-from loguru import logger
+import typer
 
 
-def get_args_params() -> argparse.Namespace:
+def validate_date(date_str: str) -> None:
     """
-    Parses command line arguments.
+    Validates that a date string is in the correct YYYY-MM-DD format.
+    
+    Args:
+        date_str: The date string to validate (can be any type, will be converted to string)
+        
+    Raises:
+        typer.BadParameter: If the date format is invalid
     """
-    parser = argparse.ArgumentParser(description="Fetch and process Auckland Transport bus data.")
-    
-    parser.add_argument(
-        "--date",
-        type=str,
-        default=date.today().strftime("%Y-%m-%d"),
-        help="Date for which to fetch the data (format: YYYY-MM-DD). Default is today."
-    )
-    
-    parser.add_argument(
-        "--env-var-token",
-        type=str,
-        default=None,
-        help="The environment variable where to get the token for GCS"
-    )
-    
-    args = parser.parse_args()
-    
-    logger.info(f"Arguments received: {args}")                  
-    
-    return args
+    try:
+        date.fromisoformat(date_str)
+    except ValueError:
+        raise typer.BadParameter(
+            f"Invalid date format: {date_str}. Please use YYYY-MM-DD format."
+        )

@@ -1,13 +1,15 @@
 import os
-from typing import Dict
+from typing import Dict, Optional
+import datetime
 
 import polars as pl
 import requests
+import typer
 from dotenv import load_dotenv
 from google.cloud import storage  # type: ignore
 from loguru import logger
 
-from at_bus_load.entrypoints_params import get_args_params
+from at_bus_load import entrypoints_params
 from at_bus_load.gcp import ConnectGCS, get_token_from_env_var
 
 
@@ -279,8 +281,16 @@ def send_trips_data_to_gcs(
         raise
 
 
-def main():
-    
+def main(
+    date: str = typer.Option(
+        default=datetime.date.today().strftime("%Y-%m-%d"),
+        help="Date for which to fetch the data (format: YYYY-MM-DD). Default is today."
+    ),
+    env_var_token: Optional[str] = typer.Option(
+        default=None,
+        help="The environment variable where to get the token for GCS"
+    )
+) -> None:
     """
     Main function to fetch and process Auckland Transport bus data.
 
@@ -292,15 +302,15 @@ def main():
     Raises:
         Exception: If there are any errors uploading data to GCS.
     """
-
-    args = get_args_params()
-    api_date = args.date
+    
+    entrypoints_params.validate_date(date)
+    api_date = date
     
     logger.info(f"Fetching data for date: {api_date}")
     
     load_dotenv()
     
-    token = get_token_from_env_var(args.env_var_token)
+    token = get_token_from_env_var(env_var_token)
     client = ConnectGCS(token).client
     
     df_stops = get_stops_data(api_date)
@@ -314,7 +324,11 @@ def main():
         
         df_trips = get_trips_data(stop_id, api_date)
         send_trips_data_to_gcs(client, df_trips, stop_id, api_date)
-    
+
+def entrypoint():
+    """CLI entry point for the script."""
+    typer.run(main)
+
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
