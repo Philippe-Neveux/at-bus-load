@@ -20,3 +20,4 @@ data/*
 .vscode
 
 .coverage
+.DS_Store
