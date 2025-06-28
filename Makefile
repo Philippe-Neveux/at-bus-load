@@ -13,6 +13,22 @@ ruff_isort:
 mypy:
 	uv run mypy src/ 
 
+# Test commands
+test:
+	uv run pytest tests/ -v --cov=src/at_bus_load --cov-report=term-missing --cov-report=html:htmlcov
+
+test-unit:
+	uv run pytest tests/ -m unit -v
+
+test-coverage:
+	uv run pytest tests/ --cov=src/at_bus_load --cov-report=html:htmlcov --cov-report=xml:coverage.xml
+
+test-watch:
+	uv run pytest tests/ -v --cov=src/at_bus_load --cov-report=term-missing -f
+
+# Quality checks
+quality: ruff_check mypy test
+
 get_api_data:
 	uv run get_api_data.py
 

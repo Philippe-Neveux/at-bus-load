@@ -39,23 +39,24 @@ def get_at_gtfs_data_from_at_mobile_api(
     # logger.info(f"Request URL: {response.url}")
     if response.status_code != 200:
         logger.error(f"Request failed with status code {response.status_code}: {response.text}")
-    
-    data = response.json()
-    if "data" not in data:
-        logger.error("Expected 'data' key in the JSON response")
-    
-    logger.info(f"Successfully getting data from request '{response.url}'.")
-    
-    json_data = data["data"]
+        raise Exception(f"Request failed with status code {response.status_code}: {response.text}")
+    else:
+        data = response.json()
+        if "data" not in data:
+            logger.error("Expected 'data' key in the JSON response")
+        
+        logger.info(f"Successfully getting data from request '{response.url}'.")
+        
+        json_data = data["data"]
 
-    # Load data into Polars DataFrame
-    df = pl.DataFrame(json_data)
-    
-    for col, dtype in df.schema.items():
-        if isinstance(dtype, pl.datatypes.Struct):
-            df = df.unnest(col)
-            
-    return df
+        # Load data into Polars DataFrame
+        df = pl.DataFrame(json_data)
+        
+        for col, dtype in df.schema.items():
+            if isinstance(dtype, pl.datatypes.Struct):
+                df = df.unnest(col)
+                
+        return df
     
 def get_at_api_key() -> str:
     """
