@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import polars as pl
 import requests
@@ -8,8 +8,9 @@ import typer
 from dotenv import load_dotenv
 from google.cloud import storage  # type: ignore
 from loguru import logger
+from pydantic import ValidationError
 
-from at_bus_load import entrypoints_params
+from at_bus_load import entrypoints_params, StopResponse, TripResponse
 from at_bus_load.gcp import ConnectGCS, get_token_from_env_var
 
 
@@ -45,11 +46,29 @@ def get_at_gtfs_data_from_at_mobile_api(
     else:
         data = response.json()
         if "data" not in data:
-            logger.error("Expected 'data' key in the JSON response")
+            raise ValueError("Expected 'data' key in the JSON response")
         
         logger.info(f"Successfully getting data from request '{response.url}'.")
         
-        json_data = data["data"]
+        # Validate the response data based on the data_name
+        try:
+            if data_name == "stops":
+                validated_response = StopResponse(**data)
+            elif "stoptrips" in data_name:
+                validated_response = TripResponse(**data)
+            else:
+                logger.warning(f"No validation model available for data_name: {data_name}")
+                validated_response = None
+                
+            if validated_response:
+                logger.info(f"Successfully validated {data_name} response data")
+                json_data = [item.model_dump() for item in validated_response.data]
+            else:
+                json_data = data["data"]
+                
+        except ValidationError as e:
+            logger.error(f"Data validation failed for {data_name}: {e}")
+            raise ValueError(f"Data validation failed for {data_name}: {e}")
 
         # Load data into Polars DataFrame
         df = pl.DataFrame(json_data)
