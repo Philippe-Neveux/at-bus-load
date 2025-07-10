@@ -9,8 +9,8 @@ def main():
     client = ConnectGCS(token).client
 
     # Specify the bucket and file name
-    bucket_name = 'pne-open-data'
-    file_name = 'personality_dataset.csv'
+    bucket_name = 'at-bus-open-data'
+    file_name = 'extract/at_gtfs_trips_av_sc.parquet'
 
     # Get the bucket instance
     bucket = client.get_bucket(bucket_name)

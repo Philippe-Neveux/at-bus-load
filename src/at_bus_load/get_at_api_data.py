@@ -168,7 +168,7 @@ def send_stop_data_to_gcs(
 
     This function takes a Polars DataFrame containing stop data, and uploads it as a Parquet file to Google Cloud Storage.
     The Parquet file is stored in the "at-bus" bucket with the following structure:
-    "at-bus/{api_date}/stops.parquet"
+    "{api_date}/stops.parquet"
 
     Args:
         client: An instance of the Google Cloud Storage client.
@@ -186,8 +186,8 @@ def send_stop_data_to_gcs(
         Logs an error if there is an error while uploading the data to GCS.
     """
     try:
-        bucket = client.bucket("pne-open-data")
-        blob = bucket.blob(f"at-bus/{api_date}/stops.parquet")
+        bucket = client.bucket("at-bus-open-data")
+        blob = bucket.blob(f"{api_date}/stops.parquet")
         
         df_stops.write_parquet("data/stops.parquet")
         
@@ -249,7 +249,7 @@ def send_trips_data_to_gcs(
 
     This function takes a Polars DataFrame containing trip data, and uploads it as a Parquet file to Google Cloud Storage.
     The Parquet file is stored in the "at-bus" bucket with the following structure:
-    "at-bus/{api_date}/trips_{stop_id}.parquet"
+    "{api_date}/trips_{stop_id}.parquet"
 
     Args:
         client: An instance of the Google Cloud Storage client.
@@ -268,8 +268,8 @@ def send_trips_data_to_gcs(
         Logs an error if there is an error while uploading the data to GCS.
     """
     try:
-        bucket = client.bucket("pne-open-data")
-        blob = bucket.blob(f"at-bus/{api_date}/trips_{stop_id}.parquet")
+        bucket = client.bucket("at-bus-open-data")
+        blob = bucket.blob(f"{api_date}/trips_{stop_id}.parquet")
         
         df_trips.write_parquet(f"data/trips_{stop_id}.parquet")
         

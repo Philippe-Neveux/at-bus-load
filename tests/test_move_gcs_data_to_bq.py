@@ -73,7 +73,7 @@ class TestMoveStopsDataToBq:
             mock_bigquery_client,
             'at_bus_bronze',  # dataset_id
             'stops_2024-01-01',  # table_id
-            'gs://test-bucket/at-bus/2024-01-01/stops.parquet'  # source_uri
+            'gs://test-bucket/2024-01-01/stops.parquet'  # source_uri
         )
 
 
@@ -84,10 +84,10 @@ class TestGetAllRouteIdFromTripsFileName:
         """Test successful extraction of route IDs from file names."""
         # Mock blob names that match the pattern
         blob_names = [
-            "at-bus/2024-01-01/trips_route_001.parquet",
-            "at-bus/2024-01-01/trips_route_002.parquet", 
-            "at-bus/2024-01-01/stops.parquet",  # Should be ignored
-            "at-bus/2024-01-01/trips_route_003.parquet"
+            "2024-01-01/trips_route_001.parquet",
+            "2024-01-01/trips_route_002.parquet", 
+            "2024-01-01/stops.parquet",  # Should be ignored
+            "2024-01-01/trips_route_003.parquet"
         ]
         mock_blobs = mock_gcs_blobs(blob_names)
         
@@ -103,7 +103,7 @@ class TestGetAllRouteIdFromTripsFileName:
         # Verify the bucket was accessed correctly
         mock_storage_client.get_bucket.assert_called_once_with("test-bucket")
         mock_bucket.list_blobs.assert_called_once_with(
-            prefix="at-bus/2024-01-01"
+            prefix="2024-01-01"
         )
         
         # Verify the correct route IDs were extracted
@@ -114,8 +114,8 @@ class TestGetAllRouteIdFromTripsFileName:
         """Test when no files match the trips pattern."""
         # Mock blob names that don't match the pattern
         blob_names = [
-            "at-bus/2024-01-01/stops.parquet",
-            "at-bus/2024-01-01/other_file.txt"
+            "2024-01-01/stops.parquet",
+            "2024-01-01/other_file.txt"
         ]
         mock_blobs = mock_gcs_blobs(blob_names)
         
@@ -149,9 +149,9 @@ class TestGetAllRouteIdFromTripsFileName:
         """Test extraction of complex route IDs with special characters."""
         # Mock blob names with complex route IDs
         blob_names = [
-            "at-bus/2024-01-01/trips_route-001-A.parquet",
-            "at-bus/2024-01-01/trips_route_002_B.parquet",
-            "at-bus/2024-01-01/trips_route003.parquet"
+            "2024-01-01/trips_route-001-A.parquet",
+            "2024-01-01/trips_route_002_B.parquet",
+            "2024-01-01/trips_route003.parquet"
         ]
         mock_blobs = mock_gcs_blobs(blob_names)
         
@@ -202,19 +202,19 @@ class TestMoveTripsDataToBq:
                 mock_bigquery_client,
                 'at_bus_bronze',
                 'trips_route_001_2024-01-01',
-                'gs://test-bucket/at-bus/2024-01-01/trips_route_001.parquet'
+                'gs://test-bucket/2024-01-01/trips_route_001.parquet'
             ),
             (
                 mock_bigquery_client,
                 'at_bus_bronze',
                 'trips_route_002_2024-01-01',
-                'gs://test-bucket/at-bus/2024-01-01/trips_route_002.parquet'
+                'gs://test-bucket/2024-01-01/trips_route_002.parquet'
             ),
             (
                 mock_bigquery_client,
                 'at_bus_bronze',
                 'trips_route_003_2024-01-01',
-                'gs://test-bucket/at-bus/2024-01-01/trips_route_003.parquet'
+                'gs://test-bucket/2024-01-01/trips_route_003.parquet'
             )
         ]
         
@@ -280,7 +280,7 @@ class TestIntegrationScenarios:
             mock_bigquery_client,
             'at_bus_bronze',
             'stops_2024-01-01',
-            'gs://test-bucket/at-bus/2024-01-01/stops.parquet'
+            'gs://test-bucket/2024-01-01/stops.parquet'
         )
         
         # Reset mock for trips test
@@ -303,12 +303,12 @@ class TestIntegrationScenarios:
                 mock_bigquery_client,
                 'at_bus_bronze',
                 'trips_route_001_2024-01-01',
-                'gs://test-bucket/at-bus/2024-01-01/trips_route_001.parquet'
+                'gs://test-bucket/2024-01-01/trips_route_001.parquet'
             )
             
             assert calls[1][0] == (
                 mock_bigquery_client,
                 'at_bus_bronze',
                 'trips_route_002_2024-01-01',
-                'gs://test-bucket/at-bus/2024-01-01/trips_route_002.parquet'
+                'gs://test-bucket/2024-01-01/trips_route_002.parquet'
             ) 

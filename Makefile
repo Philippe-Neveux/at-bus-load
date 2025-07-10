@@ -1,5 +1,5 @@
 GCP_REGION=australia-southeast1
-GCP_PROJECT_ID = glossy-apex-462002-i3
+GCP_PROJECT_ID = at-bus-465401
 GCP_ARTIFACT_REPOSITORY = python-projects
 DOCKER_IMAGE_NAME = at-bus-load
 
@@ -29,8 +29,11 @@ test-watch:
 # Quality checks
 quality: ruff_check mypy test
 
-get_api_data:
-	uv run get_api_data.py
+get_at_api_data:
+	uv run get_at_api_data --date $(DATE)
+
+move_gcs_data_to_bq:
+	uv run move_gcs_data_to_bq --date $(DATE)
 
 build_docker_image:
 	docker image build --no-cache . --tag $(DOCKER_IMAGE_NAME):latest

@@ -54,7 +54,7 @@ def move_stops_data_to_bq(
     Loads a Parquet file from Google Cloud Storage into a BigQuery dataset.
 
     This function assumes that the Parquet file is located at
-    `gs://{source_bucket_name}/at-bus/{date}/stops.parquet`.
+    `gs://{source_bucket_name}/{date}/stops.parquet`.
 
     The data is loaded into the BigQuery dataset `at_bus_bronze` with a table name
     that is the same as the date in the source URI.
@@ -68,7 +68,7 @@ def move_stops_data_to_bq(
     Returns:
         None
     """
-    source_file_name = f'at-bus/{exec_date}/stops.parquet'
+    source_file_name = f'{exec_date}/stops.parquet'
 
     # Define the destination BigQuery dataset and table
     dataset_id = 'at_bus_bronze'
@@ -100,7 +100,7 @@ def get_all_route_id_from_trips_file_name(
     bucket = gcs_client.get_bucket(f"{source_bucket_name}")
     
     # Get a list of all blobs in the source bucket with the given prefix
-    blobs = list(bucket.list_blobs(prefix=f"at-bus/{exec_date}"))
+    blobs = list(bucket.list_blobs(prefix=f"{exec_date}"))
 
     route_ids = []
     
@@ -144,7 +144,7 @@ def move_trips_data_to_bq(
     )
     
     for route_id in route_ids:
-        source_file_name = f'at-bus/{exec_date}/trips_{route_id}.parquet'
+        source_file_name = f'{exec_date}/trips_{route_id}.parquet'
         table_id = f'trips_{route_id}_{exec_date}'
 
         # Create a reference to the source Parquet file
@@ -180,7 +180,7 @@ def main(
     client_gcs = ConnectGCS(token).client
     client_bq = ConnectBQ(token).client
     
-    source_bucket_name = 'pne-open-data'
+    source_bucket_name = 'at-bus-open-data'
     
     move_stops_data_to_bq(client_bq, source_bucket_name, exec_date)
     move_trips_data_to_bq(client_gcs, client_bq, source_bucket_name, exec_date)

@@ -219,8 +219,8 @@ class TestSendStopDataToGcs:
         send_stop_data_to_gcs(mock_storage_client, sample_stops_data, "2024-01-01")
         
         # Verify the bucket and blob were accessed correctly
-        mock_storage_client.bucket.assert_called_once_with("pne-open-data")
-        mock_storage_client.bucket().blob.assert_called_once_with("at-bus/2024-01-01/stops.parquet")
+        mock_storage_client.bucket.assert_called_once_with("at-bus-open-data")
+        mock_storage_client.bucket().blob.assert_called_once_with("2024-01-01/stops.parquet")
         
         # Verify the parquet file was written
         mock_write_parquet.assert_called_once_with("data/stops.parquet")
@@ -246,8 +246,8 @@ class TestSendTripsDataToGcs:
         send_trips_data_to_gcs(mock_storage_client, sample_trips_data, "route_001", "2024-01-01")
         
         # Verify the bucket and blob were accessed correctly
-        mock_storage_client.bucket.assert_called_once_with("pne-open-data")
-        mock_storage_client.bucket().blob.assert_called_once_with("at-bus/2024-01-01/trips_route_001.parquet")
+        mock_storage_client.bucket.assert_called_once_with("at-bus-open-data")
+        mock_storage_client.bucket().blob.assert_called_once_with("2024-01-01/trips_route_001.parquet")
         
         # Verify the parquet file was written
         mock_write_parquet.assert_called_once_with("data/trips_route_001.parquet")
