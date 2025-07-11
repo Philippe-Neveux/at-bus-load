@@ -3,6 +3,7 @@ name: Build and Push Docker image to GCPArtifact Registry
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
