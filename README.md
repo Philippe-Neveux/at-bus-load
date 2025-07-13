@@ -1,5 +1,19 @@
 # AT Bus Load: Real-time Auckland Transport Data Pipeline
 
+This repository is a part of AT Bus project. This project aims to build an ELT pipeline from open source data to a dashboard in order to visualise what are the best route bus from Avondale to Sagrado Cantina, a Mexican Restaurant in K Road, Auckland, New Zealand. The open data is provided by Auckland Transport [here](https://dev-portal.at.govt.nz/api-details#api=gtfs-api&operation=get-calendars-id).
+
+All of the repositories of this project are the follow ones:
+
+- at-bus-load: Python repository for loading data from the open API provided by Auckland Transport to a Google Cloud Storage bucket and then moved to BigQuery.
+- at-bus-transform: dbt project for transforming the data from BigQuery bronze dataset to a BigQuery gold dataset.
+- at-bus-superset-server: Superset server for visualising the BigQuery gold dataset (Ansible).
+- at-bus-airflow-server: Airflow server for orchestrating the ELT pipeline (Ansible).
+- at-bus-infrastructure: Infrastructure repository for managing the infrastructure of the project (Terraform).
+ 
+![at-bus-architecture](./docs/at-bus_infra-drawio.png)
+
+---
+
 This project provides a complete data pipeline for fetching, storing, and analyzing real-time bus data from Auckland Transport (AT). It is designed to run entirely on Google Cloud Platform (GCP), using a suite of tools to automate data ingestion, processing, and storage for advanced analytics.
 
 ## Key Features
